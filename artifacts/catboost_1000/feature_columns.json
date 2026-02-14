@@ -1,0 +1,29 @@
+{
+  "feature_cols": [
+    "item_id",
+    "dept_id",
+    "cat_id",
+    "sell_price",
+    "wday",
+    "month",
+    "year",
+    "weekofyear",
+    "snap_CA",
+    "is_event",
+    "lag_1",
+    "lag_7",
+    "lag_14",
+    "lag_28",
+    "roll_mean_7",
+    "roll_mean_28",
+    "roll_std_7",
+    "roll_std_28",
+    "price_change_1",
+    "price_rel_7"
+  ],
+  "cat_cols": [
+    "item_id",
+    "dept_id",
+    "cat_id"
+  ]
+}

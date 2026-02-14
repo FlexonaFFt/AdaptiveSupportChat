@@ -1,0 +1,24 @@
+{
+  "config": {
+    "store_id": "CA_1",
+    "top_n": 1000,
+    "val_days": 28,
+    "iterations": 3000,
+    "rows_total": 1885000,
+    "rows_train": 1857000,
+    "rows_val": 28000,
+    "max_day": 1913,
+    "val_start_day": 1886
+  },
+  "naive_lag7": {
+    "MAE": 2.4818214285714286,
+    "RMSE": 4.4991467445029425,
+    "WAPE": 0.7472471934276743
+  },
+  "catboost": {
+    "MAE": 1.8622989678094515,
+    "RMSE": 3.1945474027449667,
+    "WAPE": 0.5607162791804448,
+    "best_iteration": 1244
+  }
+}
