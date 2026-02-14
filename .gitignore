@@ -1,0 +1,15 @@
+/m5-forecasting-accuracy/
+
+# PyCharm / JetBrains
+.idea/
+*.iml
+out/
+
+# Python cache and virtual envs
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
