@@ -19,6 +19,7 @@ def main() -> None:
         host=settings.app_host,
         port=settings.app_port,
         reload=False,
+        timeout_graceful_shutdown=5,
     )
 
 

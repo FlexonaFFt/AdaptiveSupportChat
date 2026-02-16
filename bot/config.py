@@ -12,6 +12,7 @@ class Settings:
     webhook_path: str
     app_host: str
     app_port: int
+    flow_file: str
 
 
 def load_settings() -> Settings:
@@ -22,6 +23,7 @@ def load_settings() -> Settings:
     webhook_path = os.getenv("WEBHOOK_PATH", "/telegram/webhook").strip()
     app_host = os.getenv("APP_HOST", "0.0.0.0").strip()
     app_port = int(os.getenv("APP_PORT", "8000").strip())
+    flow_file = os.getenv("FLOW_FILE", "docs/flow.md").strip()
 
     if not bot_token:
         raise RuntimeError("BOT_TOKEN is not set. Put it in .env (see .env.example).")
@@ -41,4 +43,5 @@ def load_settings() -> Settings:
         webhook_path=webhook_path,
         app_host=app_host,
         app_port=app_port,
+        flow_file=flow_file,
     )
