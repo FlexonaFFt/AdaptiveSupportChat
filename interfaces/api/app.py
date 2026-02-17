@@ -9,9 +9,14 @@ from aiogram.enums import ParseMode
 from aiogram.types import Update
 from fastapi import FastAPI, Request
 
+from infrastructure.bootstrap_artifacts import load_bootstrap_questions
 from infrastructure.llm_api_client import LLMApiClient
 from infrastructure.rag.retriever import KnowledgeRetriever
-from infrastructure.runtime import set_knowledge_retriever, set_llm_client
+from infrastructure.runtime import (
+    set_knowledge_retriever,
+    set_llm_client,
+    set_start_questions,
+)
 from infrastructure.settings import Settings
 from interfaces.telegram.handlers import router
 
@@ -37,6 +42,12 @@ def create_app(settings: Settings) -> FastAPI:
         top_k=settings.rag_top_k,
     )
     set_knowledge_retriever(retriever)
+    set_start_questions(
+        load_bootstrap_questions(
+            path=settings.generated_faq_file,
+            limit=settings.start_faq_limit,
+        )
+    )
 
     bot = Bot(
         token=settings.bot_token,

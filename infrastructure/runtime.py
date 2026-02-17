@@ -7,6 +7,7 @@ from infrastructure.rag.retriever import KnowledgeRetriever
 _flow_engine: Optional[FlowEngine] = None
 _llm_client: Optional[LLMApiClient] = None
 _knowledge_retriever: Optional[KnowledgeRetriever] = None
+_start_questions: list[str] = []
 
 
 def set_flow_engine(engine: FlowEngine) -> None:
@@ -40,3 +41,12 @@ def get_knowledge_retriever() -> KnowledgeRetriever:
     if _knowledge_retriever is None:
         raise RuntimeError("Knowledge retriever is not initialized.")
     return _knowledge_retriever
+
+
+def set_start_questions(questions: list[str]) -> None:
+    global _start_questions
+    _start_questions = questions
+
+
+def get_start_questions() -> list[str]:
+    return _start_questions

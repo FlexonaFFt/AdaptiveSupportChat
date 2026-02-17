@@ -26,6 +26,9 @@ class Settings:
     rag_top_k: int
     rag_chunk_size_chars: int
     rag_chunk_overlap_chars: int
+    generated_dir: str
+    generated_faq_file: str
+    start_faq_limit: int
 
 
 def load_settings() -> Settings:
@@ -62,6 +65,9 @@ def load_settings() -> Settings:
     rag_top_k = int(os.getenv("RAG_TOP_K", "4").strip())
     rag_chunk_size_chars = int(os.getenv("RAG_CHUNK_SIZE_CHARS", "900").strip())
     rag_chunk_overlap_chars = int(os.getenv("RAG_CHUNK_OVERLAP_CHARS", "120").strip())
+    generated_dir = os.getenv("GENERATED_DIR", "generated").strip()
+    generated_faq_file = os.getenv("GENERATED_FAQ_FILE", "generated/faq.json").strip()
+    start_faq_limit = int(os.getenv("START_FAQ_LIMIT", "4").strip())
 
     if not bot_token:
         raise RuntimeError("BOT_TOKEN is not set. Put it in .env (see .env.example).")
@@ -77,6 +83,8 @@ def load_settings() -> Settings:
         raise RuntimeError("RAG_CHUNK_OVERLAP_CHARS must be >= 0.")
     if rag_chunk_overlap_chars >= rag_chunk_size_chars:
         raise RuntimeError("RAG_CHUNK_OVERLAP_CHARS must be less than RAG_CHUNK_SIZE_CHARS.")
+    if start_faq_limit < 0:
+        raise RuntimeError("START_FAQ_LIMIT must be >= 0.")
     if bot_mode == "webhook" and not webhook_base_url:
         raise RuntimeError(
             "WEBHOOK_BASE_URL is not set. Put it in .env (see .env.example)."
@@ -105,4 +113,7 @@ def load_settings() -> Settings:
         rag_top_k=rag_top_k,
         rag_chunk_size_chars=rag_chunk_size_chars,
         rag_chunk_overlap_chars=rag_chunk_overlap_chars,
+        generated_dir=generated_dir,
+        generated_faq_file=generated_faq_file,
+        start_faq_limit=start_faq_limit,
     )

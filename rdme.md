@@ -20,6 +20,7 @@ main.py
 - Тестовый сценарий поддержки:
   - `/start` показывает кнопку `Поддержка`,
   - после нажатия пользователь может отправлять вопросы,
+  - бот показывает автосгенерированные частые вопросы кнопками,
   - бот выполняет retrieval по файлам в `knowledge/`,
   - бот отправляет вопрос + найденный контекст в LLM API и возвращает ответ.
 - Healthcheck: `GET /health`.
@@ -38,6 +39,7 @@ main.py
   - `GIGACHAT_AUTH_URL`, `GIGACHAT_API_URL`, `GIGACHAT_SCOPE`
   - `KNOWLEDGE_DIR`
   - `RAG_TOP_K`, `RAG_CHUNK_SIZE_CHARS`, `RAG_CHUNK_OVERLAP_CHARS`
+  - `GENERATED_DIR`, `GENERATED_FAQ_FILE`, `START_FAQ_LIMIT`
   - `APP_HOST`, `APP_PORT`
   - `WEBHOOK_BASE_URL`, `WEBHOOK_PATH` (для webhook-режима)
 
@@ -46,6 +48,10 @@ main.py
 - Подготовлена база для следующего этапа: подключение RAG и сценариев эскалации.
 
 ## Docker
+Во время `docker build` автоматически запускается bootstrap:
+- читает документы из `knowledge/`,
+- генерирует `generated/faq.json` с частыми вопросами.
+
 Сборка образа:
 ```bash
 docker build -t adaptive-support:bot-api .
@@ -85,5 +91,6 @@ LLM_MODEL=GigaChat
 
 ## RAG
 - Положите `.md`/`.txt` документы в `/Users/flexonafft/AdaptiveSupport/knowledge`.
+- При сборке образа генерируются FAQ-артефакты из документов.
 - При старте приложения индекс чанков строится автоматически.
 - В ответ LLM передается только найденный по вопросу контекст из базы знаний.

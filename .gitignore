@@ -20,3 +20,6 @@ venv/
 .env
 .env.*
 !.env.example
+
+# Generated artifacts
+generated/*.json
