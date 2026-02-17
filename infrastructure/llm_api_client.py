@@ -3,6 +3,7 @@ import json
 import ssl
 import time
 import uuid
+from typing import Optional
 from urllib import error, parse, request
 
 
@@ -44,17 +45,32 @@ class LLMApiClient:
     def model(self) -> str:
         return self._model
 
-    async def ask(self, user_text: str, context: str = "") -> str:
+    async def ask(
+        self,
+        user_text: str,
+        context: str = "",
+        chat_history: Optional[list[dict[str, str]]] = None,
+    ) -> str:
         if not user_text.strip():
             raise LLMApiError("Empty question.")
-        return await asyncio.to_thread(self._ask_sync, user_text, context)
+        return await asyncio.to_thread(self._ask_sync, user_text, context, chat_history)
 
-    def _ask_sync(self, user_text: str, context: str) -> str:
+    def _ask_sync(
+        self,
+        user_text: str,
+        context: str,
+        chat_history: Optional[list[dict[str, str]]],
+    ) -> str:
         if self._provider == "gigachat":
-            return self._ask_gigachat_sync(user_text, context)
-        return self._ask_openai_compatible_sync(user_text, context)
+            return self._ask_gigachat_sync(user_text, context, chat_history)
+        return self._ask_openai_compatible_sync(user_text, context, chat_history)
 
-    def _ask_openai_compatible_sync(self, user_text: str, context: str) -> str:
+    def _ask_openai_compatible_sync(
+        self,
+        user_text: str,
+        context: str,
+        chat_history: Optional[list[dict[str, str]]],
+    ) -> str:
         if not self._openai_api_key:
             raise LLMApiError("LLM_API_KEY is not configured.")
         if not self._openai_api_url:
@@ -64,10 +80,16 @@ class LLMApiClient:
             bearer_token=self._openai_api_key,
             user_text=user_text,
             context=context,
+            chat_history=chat_history,
             ssl_context=None,
         )
 
-    def _ask_gigachat_sync(self, user_text: str, context: str) -> str:
+    def _ask_gigachat_sync(
+        self,
+        user_text: str,
+        context: str,
+        chat_history: Optional[list[dict[str, str]]],
+    ) -> str:
         if not self._gigachat_api_url:
             raise LLMApiError("GIGACHAT_API_URL is not configured.")
         access_token = self._ensure_gigachat_access_token()
@@ -79,6 +101,7 @@ class LLMApiClient:
             bearer_token=access_token,
             user_text=user_text,
             context=context,
+            chat_history=chat_history,
             ssl_context=ssl_context,
         )
 
@@ -88,11 +111,15 @@ class LLMApiClient:
         bearer_token: str,
         user_text: str,
         context: str,
+        chat_history: Optional[list[dict[str, str]]],
         ssl_context: ssl.SSLContext | None,
     ) -> str:
         system_prompt = (
             "Ты ассистент службы поддержки. Отвечай кратко и по делу. "
             "Используй только факты из блока КОНТЕКСТ. "
+            "Учитывай историю диалога при формировании ответа. "
+            "Если в вопросе не хватает критичных деталей (товар, номер заказа, регион, срок), "
+            "сначала задай один короткий уточняющий вопрос, а не давай предположений. "
             "Если фактов недостаточно, предложи подключить оператора. "
             "Не упоминай слова 'контекст', 'база знаний', 'retrieval', 'RAG', "
             "'источник документа' или внутреннюю логику системы."
@@ -100,15 +127,18 @@ class LLMApiClient:
         user_payload = user_text
         if context.strip():
             user_payload = f"КОНТЕКСТ:\n{context}\n\nВОПРОС:\n{user_text}"
+        messages: list[dict[str, str]] = [
+            {"role": "system", "content": system_prompt},
+        ]
+        for item in chat_history or []:
+            role = str(item.get("role", "")).strip()
+            content = str(item.get("content", "")).strip()
+            if role in {"user", "assistant"} and content:
+                messages.append({"role": role, "content": content})
+        messages.append({"role": "user", "content": user_payload})
         payload = {
             "model": self._model,
-            "messages": [
-                {
-                    "role": "system",
-                    "content": system_prompt,
-                },
-                {"role": "user", "content": user_payload},
-            ],
+            "messages": messages,
             "temperature": 0.2,
         }
         headers = {

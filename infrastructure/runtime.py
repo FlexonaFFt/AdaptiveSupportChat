@@ -8,6 +8,7 @@ _flow_engine: Optional[FlowEngine] = None
 _llm_client: Optional[LLMApiClient] = None
 _knowledge_retriever: Optional[KnowledgeRetriever] = None
 _start_questions: list[str] = []
+_rag_min_relevance_score: float = 0.12
 
 
 def set_flow_engine(engine: FlowEngine) -> None:
@@ -50,3 +51,12 @@ def set_start_questions(questions: list[str]) -> None:
 
 def get_start_questions() -> list[str]:
     return _start_questions
+
+
+def set_rag_min_relevance_score(value: float) -> None:
+    global _rag_min_relevance_score
+    _rag_min_relevance_score = value
+
+
+def get_rag_min_relevance_score() -> float:
+    return _rag_min_relevance_score

@@ -15,6 +15,7 @@ from infrastructure.rag.retriever import KnowledgeRetriever
 from infrastructure.runtime import (
     set_knowledge_retriever,
     set_llm_client,
+    set_rag_min_relevance_score,
     set_start_questions,
 )
 from infrastructure.settings import Settings
@@ -42,6 +43,7 @@ def create_app(settings: Settings) -> FastAPI:
         top_k=settings.rag_top_k,
     )
     set_knowledge_retriever(retriever)
+    set_rag_min_relevance_score(settings.rag_min_relevance_score)
     set_start_questions(
         load_bootstrap_questions(
             path=settings.generated_faq_file,

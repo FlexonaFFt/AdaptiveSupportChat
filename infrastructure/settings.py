@@ -24,6 +24,7 @@ class Settings:
     gigachat_verify_ssl: bool
     knowledge_dir: str
     rag_top_k: int
+    rag_min_relevance_score: float
     rag_chunk_size_chars: int
     rag_chunk_overlap_chars: int
     generated_dir: str
@@ -63,6 +64,7 @@ def load_settings() -> Settings:
     }
     knowledge_dir = os.getenv("KNOWLEDGE_DIR", "knowledge").strip()
     rag_top_k = int(os.getenv("RAG_TOP_K", "4").strip())
+    rag_min_relevance_score = float(os.getenv("RAG_MIN_RELEVANCE_SCORE", "0.12").strip())
     rag_chunk_size_chars = int(os.getenv("RAG_CHUNK_SIZE_CHARS", "900").strip())
     rag_chunk_overlap_chars = int(os.getenv("RAG_CHUNK_OVERLAP_CHARS", "120").strip())
     generated_dir = os.getenv("GENERATED_DIR", "generated").strip()
@@ -77,6 +79,8 @@ def load_settings() -> Settings:
         raise RuntimeError("LLM_PROVIDER must be either 'openai' or 'gigachat'.")
     if rag_top_k < 1:
         raise RuntimeError("RAG_TOP_K must be >= 1.")
+    if not (0.0 <= rag_min_relevance_score <= 1.0):
+        raise RuntimeError("RAG_MIN_RELEVANCE_SCORE must be in [0.0, 1.0].")
     if rag_chunk_size_chars < 200:
         raise RuntimeError("RAG_CHUNK_SIZE_CHARS must be >= 200.")
     if rag_chunk_overlap_chars < 0:
@@ -111,6 +115,7 @@ def load_settings() -> Settings:
         gigachat_verify_ssl=gigachat_verify_ssl,
         knowledge_dir=knowledge_dir,
         rag_top_k=rag_top_k,
+        rag_min_relevance_score=rag_min_relevance_score,
         rag_chunk_size_chars=rag_chunk_size_chars,
         rag_chunk_overlap_chars=rag_chunk_overlap_chars,
         generated_dir=generated_dir,
