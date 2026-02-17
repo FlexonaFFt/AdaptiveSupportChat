@@ -20,7 +20,8 @@ main.py
 - Тестовый сценарий поддержки:
   - `/start` показывает кнопку `Поддержка`,
   - после нажатия пользователь может отправлять вопросы,
-  - бот пересылает вопрос в LLM API и возвращает ответ.
+  - бот выполняет retrieval по файлам в `knowledge/`,
+  - бот отправляет вопрос + найденный контекст в LLM API и возвращает ответ.
 - Healthcheck: `GET /health`.
 
 ## Безопасность и конфигурация
@@ -35,6 +36,8 @@ main.py
   - `LLM_MODEL`
   - `GIGACHAT_AUTH_KEY` (если `LLM_PROVIDER=gigachat`)
   - `GIGACHAT_AUTH_URL`, `GIGACHAT_API_URL`, `GIGACHAT_SCOPE`
+  - `KNOWLEDGE_DIR`
+  - `RAG_TOP_K`, `RAG_CHUNK_SIZE_CHARS`, `RAG_CHUNK_OVERLAP_CHARS`
   - `APP_HOST`, `APP_PORT`
   - `WEBHOOK_BASE_URL`, `WEBHOOK_PATH` (для webhook-режима)
 
@@ -79,3 +82,8 @@ GIGACHAT_API_URL=https://gigachat.devices.sberbank.ru/api/v1/chat/completions
 GIGACHAT_SCOPE=GIGACHAT_API_PERS
 LLM_MODEL=GigaChat
 ```
+
+## RAG
+- Положите `.md`/`.txt` документы в `/Users/flexonafft/AdaptiveSupport/knowledge`.
+- При старте приложения индекс чанков строится автоматически.
+- В ответ LLM передается только найденный по вопросу контекст из базы знаний.

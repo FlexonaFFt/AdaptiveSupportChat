@@ -6,7 +6,8 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from infrastructure.llm_api_client import LLMApiError
-from infrastructure.runtime import get_llm_client
+from infrastructure.rag.retriever import RetrievedChunk
+from infrastructure.runtime import get_knowledge_retriever, get_llm_client
 
 router = Router()
 _support_mode_users: set[int] = set()
@@ -55,8 +56,12 @@ async def support_question_handler(message: Message) -> None:
         return
 
     llm_client = get_llm_client()
+    retriever = get_knowledge_retriever()
+    chunks = retriever.retrieve(message.text or "")
+    context = _build_context(chunks)
+
     try:
-        answer = await llm_client.ask(message.text or "")
+        answer = await llm_client.ask(message.text or "", context=context)
     except LLMApiError as exc:
         safe_error = html.escape(str(exc))
         await message.answer(f"Ошибка LLM API: {safe_error}")
@@ -66,3 +71,14 @@ async def support_question_handler(message: Message) -> None:
         return
 
     await message.answer(answer)
+
+
+def _build_context(chunks: list[RetrievedChunk]) -> str:
+    if not chunks:
+        return ""
+    lines: list[str] = []
+    for idx, chunk in enumerate(chunks, start=1):
+        lines.append(f"[Источник {idx}: {chunk.source}]")
+        lines.append(chunk.text)
+        lines.append("")
+    return "\n".join(lines).strip()

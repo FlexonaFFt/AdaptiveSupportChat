@@ -44,17 +44,17 @@ class LLMApiClient:
     def model(self) -> str:
         return self._model
 
-    async def ask(self, user_text: str) -> str:
+    async def ask(self, user_text: str, context: str = "") -> str:
         if not user_text.strip():
             raise LLMApiError("Empty question.")
-        return await asyncio.to_thread(self._ask_sync, user_text)
+        return await asyncio.to_thread(self._ask_sync, user_text, context)
 
-    def _ask_sync(self, user_text: str) -> str:
+    def _ask_sync(self, user_text: str, context: str) -> str:
         if self._provider == "gigachat":
-            return self._ask_gigachat_sync(user_text)
-        return self._ask_openai_compatible_sync(user_text)
+            return self._ask_gigachat_sync(user_text, context)
+        return self._ask_openai_compatible_sync(user_text, context)
 
-    def _ask_openai_compatible_sync(self, user_text: str) -> str:
+    def _ask_openai_compatible_sync(self, user_text: str, context: str) -> str:
         if not self._openai_api_key:
             raise LLMApiError("LLM_API_KEY is not configured.")
         if not self._openai_api_url:
@@ -63,10 +63,11 @@ class LLMApiClient:
             api_url=self._openai_api_url,
             bearer_token=self._openai_api_key,
             user_text=user_text,
+            context=context,
             ssl_context=None,
         )
 
-    def _ask_gigachat_sync(self, user_text: str) -> str:
+    def _ask_gigachat_sync(self, user_text: str, context: str) -> str:
         if not self._gigachat_api_url:
             raise LLMApiError("GIGACHAT_API_URL is not configured.")
         access_token = self._ensure_gigachat_access_token()
@@ -77,6 +78,7 @@ class LLMApiClient:
             api_url=self._gigachat_api_url,
             bearer_token=access_token,
             user_text=user_text,
+            context=context,
             ssl_context=ssl_context,
         )
 
@@ -85,16 +87,25 @@ class LLMApiClient:
         api_url: str,
         bearer_token: str,
         user_text: str,
+        context: str,
         ssl_context: ssl.SSLContext | None,
     ) -> str:
+        system_prompt = (
+            "Ты ассистент службы поддержки. Отвечай кратко и по делу. "
+            "Используй только факты из блока КОНТЕКСТ. "
+            "Если фактов недостаточно, так и скажи и предложи передать вопрос оператору."
+        )
+        user_payload = user_text
+        if context.strip():
+            user_payload = f"КОНТЕКСТ:\n{context}\n\nВОПРОС:\n{user_text}"
         payload = {
             "model": self._model,
             "messages": [
                 {
                     "role": "system",
-                    "content": "Ты ассистент службы поддержки. Отвечай кратко и по делу.",
+                    "content": system_prompt,
                 },
-                {"role": "user", "content": user_text},
+                {"role": "user", "content": user_payload},
             ],
             "temperature": 0.2,
         }

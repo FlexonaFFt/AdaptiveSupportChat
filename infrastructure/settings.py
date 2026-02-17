@@ -22,6 +22,10 @@ class Settings:
     gigachat_api_url: str
     gigachat_scope: str
     gigachat_verify_ssl: bool
+    knowledge_dir: str
+    rag_top_k: int
+    rag_chunk_size_chars: int
+    rag_chunk_overlap_chars: int
 
 
 def load_settings() -> Settings:
@@ -54,6 +58,10 @@ def load_settings() -> Settings:
         "yes",
         "on",
     }
+    knowledge_dir = os.getenv("KNOWLEDGE_DIR", "knowledge").strip()
+    rag_top_k = int(os.getenv("RAG_TOP_K", "4").strip())
+    rag_chunk_size_chars = int(os.getenv("RAG_CHUNK_SIZE_CHARS", "900").strip())
+    rag_chunk_overlap_chars = int(os.getenv("RAG_CHUNK_OVERLAP_CHARS", "120").strip())
 
     if not bot_token:
         raise RuntimeError("BOT_TOKEN is not set. Put it in .env (see .env.example).")
@@ -61,6 +69,14 @@ def load_settings() -> Settings:
         raise RuntimeError("BOT_MODE must be either 'polling' or 'webhook'.")
     if llm_provider not in {"openai", "gigachat"}:
         raise RuntimeError("LLM_PROVIDER must be either 'openai' or 'gigachat'.")
+    if rag_top_k < 1:
+        raise RuntimeError("RAG_TOP_K must be >= 1.")
+    if rag_chunk_size_chars < 200:
+        raise RuntimeError("RAG_CHUNK_SIZE_CHARS must be >= 200.")
+    if rag_chunk_overlap_chars < 0:
+        raise RuntimeError("RAG_CHUNK_OVERLAP_CHARS must be >= 0.")
+    if rag_chunk_overlap_chars >= rag_chunk_size_chars:
+        raise RuntimeError("RAG_CHUNK_OVERLAP_CHARS must be less than RAG_CHUNK_SIZE_CHARS.")
     if bot_mode == "webhook" and not webhook_base_url:
         raise RuntimeError(
             "WEBHOOK_BASE_URL is not set. Put it in .env (see .env.example)."
@@ -85,4 +101,8 @@ def load_settings() -> Settings:
         gigachat_api_url=gigachat_api_url,
         gigachat_scope=gigachat_scope,
         gigachat_verify_ssl=gigachat_verify_ssl,
+        knowledge_dir=knowledge_dir,
+        rag_top_k=rag_top_k,
+        rag_chunk_size_chars=rag_chunk_size_chars,
+        rag_chunk_overlap_chars=rag_chunk_overlap_chars,
     )

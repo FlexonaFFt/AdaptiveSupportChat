@@ -10,7 +10,8 @@ from aiogram.types import Update
 from fastapi import FastAPI, Request
 
 from infrastructure.llm_api_client import LLMApiClient
-from infrastructure.runtime import set_llm_client
+from infrastructure.rag.retriever import KnowledgeRetriever
+from infrastructure.runtime import set_knowledge_retriever, set_llm_client
 from infrastructure.settings import Settings
 from interfaces.telegram.handlers import router
 
@@ -29,6 +30,13 @@ def create_app(settings: Settings) -> FastAPI:
         gigachat_verify_ssl=settings.gigachat_verify_ssl,
     )
     set_llm_client(llm_client)
+    retriever = KnowledgeRetriever.from_directory(
+        knowledge_dir=settings.knowledge_dir,
+        chunk_size_chars=settings.rag_chunk_size_chars,
+        chunk_overlap_chars=settings.rag_chunk_overlap_chars,
+        top_k=settings.rag_top_k,
+    )
+    set_knowledge_retriever(retriever)
 
     bot = Bot(
         token=settings.bot_token,
@@ -68,8 +76,13 @@ def create_app(settings: Settings) -> FastAPI:
     app = FastAPI(title="Adaptive Support Bot API", lifespan=lifespan)
 
     @app.get("/health")
-    async def health() -> dict[str, str]:
-        return {"status": "ok", "mode": settings.bot_mode, "llm_model": llm_client.model}
+    async def health() -> dict[str, str | int]:
+        return {
+            "status": "ok",
+            "mode": settings.bot_mode,
+            "llm_model": llm_client.model,
+            "rag_chunks": retriever.chunk_count,
+        }
 
     @app.post(settings.webhook_path)
     async def telegram_webhook(request: Request) -> dict[str, bool]:
