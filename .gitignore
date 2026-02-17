@@ -1,4 +1,5 @@
 /m5-forecasting-accuracy/
+.DS_Store
 
 # PyCharm / JetBrains
 .idea/
@@ -13,3 +14,13 @@ __pycache__/
 .ruff_cache/
 .venv/
 venv/
+.pycache_local/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Generated artifacts
+core/generated/*.json
+
