@@ -6,8 +6,8 @@ from aiogram.filters import CommandStart
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery, Message
 
-from .flow.engine import RenderItem
-from .runtime import get_flow_engine
+from application.flow_engine import RenderItem
+from infrastructure.runtime import get_flow_engine
 
 router = Router()
 _last_message_id_by_user: dict[int, int] = {}

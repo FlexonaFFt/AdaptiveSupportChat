@@ -1,13 +1,25 @@
-# AdaptiveSupport — текущий статус
+# AdaptiveSupport — Bot + API
 
-## Что уже реализовано
-- Асинхронный Telegram-бот на `aiogram`.
-- Запуск через `FastAPI + uvicorn` (единый API-процесс).
-- Два режима работы бота:
-  - `BOT_MODE=polling` (для локальной разработки),
-  - `BOT_MODE=webhook` (для прод-сценариев).
-- Базовый API-эндпоинт `GET /health`.
-- Поддержка сценариев из markdown-файла (`FLOW_FILE`, по умолчанию `docs/flow.md`).
+## Новая структура проекта (без `src`)
+```text
+domain/
+  flow/
+application/
+infrastructure/
+interfaces/
+  telegram/
+  api/
+batch/
+  airflow/
+main.py
+```
+
+## Что сейчас покрыто
+- Telegram bot runtime (`aiogram`).
+- HTTP API и lifecycle (`FastAPI + uvicorn`).
+- Flow reader и валидатор markdown-сценариев.
+- Flow engine с пользовательским состоянием in-memory.
+- Healthcheck: `GET /health`.
 
 ## Reader (v1)
 - Реализован `reader`, который:
@@ -36,3 +48,30 @@
 ## Что достигнуто
 - Получен рабочий MVP адаптивного бота, который строит диалог и кнопки из внешнего markdown-сценария.
 - Подготовлена база для следующего этапа: горячая перезагрузка flow, персистентное хранилище состояния и расширенные правила маршрутизации.
+
+## Docker
+Сборка образа:
+```bash
+docker build -t adaptive-support:bot-api .
+```
+
+Запуск:
+```bash
+docker run --env-file .env -p 8000:8000 adaptive-support:bot-api
+```
+
+## Docker Compose
+Запуск:
+```bash
+docker compose up -d --build
+```
+
+Остановка:
+```bash
+docker compose down
+```
+
+Логи:
+```bash
+docker compose logs -f bot-api
+```

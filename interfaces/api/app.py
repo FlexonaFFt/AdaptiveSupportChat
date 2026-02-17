@@ -9,11 +9,11 @@ from aiogram.enums import ParseMode
 from aiogram.types import Update
 from fastapi import FastAPI, Request
 
-from .config import Settings
-from .flow.engine import FlowEngine
-from .flow.reader import load_flow_from_markdown
-from .handlers import router
-from .runtime import set_flow_engine
+from application.flow_engine import FlowEngine
+from infrastructure.flow_markdown_reader import load_flow_from_markdown
+from infrastructure.runtime import set_flow_engine
+from infrastructure.settings import Settings
+from interfaces.telegram.handlers import router
 
 
 def create_app(settings: Settings) -> FastAPI:

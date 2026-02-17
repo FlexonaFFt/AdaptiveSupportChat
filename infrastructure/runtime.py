@@ -1,5 +1,6 @@
-from .flow.engine import FlowEngine
 from typing import Optional
+
+from application.flow_engine import FlowEngine
 
 _flow_engine: Optional[FlowEngine] = None
 

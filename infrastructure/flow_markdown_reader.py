@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Tuple
 
 import yaml
 
-from .models import Block, Button, Flow, Rules
+from domain.flow.models import Block, Button, Flow, Rules
 
 _FLOW_HEADER_RE = re.compile(r"^#\s*Support Flow:\s*([A-Za-z0-9_.-]+)\s*$")
 _BLOCK_HEADER_RE = re.compile(r"^##\s*block:\s*([A-Za-z0-9_.-]+)\s*$")
