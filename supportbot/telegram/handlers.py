@@ -9,9 +9,9 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 
-from infrastructure.llm_api_client import LLMApiError
-from infrastructure.rag.retriever import RetrievedChunk
-from infrastructure.runtime import (
+from mlcore.llm_client import LLMApiError
+from mlcore.rag.retriever import RetrievedChunk
+from core.runtime import (
     get_knowledge_retriever,
     get_llm_client,
     get_rag_min_relevance_score,

@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python -m application.bootstrap_pipeline
+RUN python -m core.bootstrap_pipeline
 
 EXPOSE 8000
 

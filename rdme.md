@@ -1,16 +1,19 @@
 # AdaptiveSupport — Bot + API
 
-## Новая структура проекта (без `src`)
+## Новая структура проекта
 ```text
-domain/
-  flow/
-application/
-infrastructure/
-interfaces/
+supportbot/
   telegram/
-  api/
-batch/
-  airflow/
+api/
+core/
+  batch/
+    airflow/
+  docs/
+  flow/
+  generated/
+  knowledge/
+mlcore/
+  rag/
 main.py
 ```
 
@@ -21,7 +24,7 @@ main.py
   - `/start` показывает кнопку `Поддержка`,
   - после нажатия пользователь может отправлять вопросы,
   - бот показывает автосгенерированные частые вопросы кнопками,
-  - бот выполняет retrieval по файлам в `knowledge/`,
+  - бот выполняет retrieval по файлам в `core/knowledge/`,
   - бот отправляет вопрос + найденный контекст в LLM API и возвращает ответ.
 - Healthcheck: `GET /health`.
 
@@ -49,8 +52,8 @@ main.py
 
 ## Docker
 Во время `docker build` автоматически запускается bootstrap:
-- читает документы из `knowledge/`,
-- генерирует `generated/faq.json` с частыми вопросами.
+- читает документы из `core/knowledge/`,
+- генерирует `core/generated/faq.json` с частыми вопросами.
 
 Сборка образа:
 ```bash
@@ -90,7 +93,7 @@ LLM_MODEL=GigaChat
 ```
 
 ## RAG
-- Положите `.md`/`.txt` документы в `/Users/flexonafft/AdaptiveSupport/knowledge`.
+- Положите `.md`/`.txt` документы в `/Users/flexonafft/AdaptiveSupport/core/knowledge`.
 - При сборке образа генерируются FAQ-артефакты из документов.
 - При старте приложения индекс чанков строится автоматически.
 - В ответ LLM передается только найденный по вопросу контекст из базы знаний.

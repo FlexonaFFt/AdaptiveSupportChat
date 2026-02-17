@@ -1,8 +1,8 @@
 from typing import Optional
 
-from application.flow_engine import FlowEngine
-from infrastructure.llm_api_client import LLMApiClient
-from infrastructure.rag.retriever import KnowledgeRetriever
+from core.flow.engine import FlowEngine
+from mlcore.llm_client import LLMApiClient
+from mlcore.rag.retriever import KnowledgeRetriever
 
 _flow_engine: Optional[FlowEngine] = None
 _llm_client: Optional[LLMApiClient] = None
