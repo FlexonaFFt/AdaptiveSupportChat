@@ -12,7 +12,16 @@ class Settings:
     webhook_path: str
     app_host: str
     app_port: int
-    flow_file: str
+    llm_provider: str
+    llm_api_key: str
+    llm_api_url: str
+    llm_model: str
+    llm_timeout_seconds: int
+    gigachat_auth_key: str
+    gigachat_auth_url: str
+    gigachat_api_url: str
+    gigachat_scope: str
+    gigachat_verify_ssl: bool
 
 
 def load_settings() -> Settings:
@@ -23,12 +32,35 @@ def load_settings() -> Settings:
     webhook_path = os.getenv("WEBHOOK_PATH", "/telegram/webhook").strip()
     app_host = os.getenv("APP_HOST", "0.0.0.0").strip()
     app_port = int(os.getenv("APP_PORT", "8000").strip())
-    flow_file = os.getenv("FLOW_FILE", "docs/flow.md").strip()
+    llm_provider = os.getenv("LLM_PROVIDER", "openai").strip().lower()
+    llm_api_key = os.getenv("LLM_API_KEY", "").strip()
+    llm_api_url = os.getenv(
+        "LLM_API_URL", "https://api.openai.com/v1/chat/completions"
+    ).strip()
+    llm_model = os.getenv("LLM_MODEL", "gpt-4o-mini").strip()
+    llm_timeout_seconds = int(os.getenv("LLM_TIMEOUT_SECONDS", "30").strip())
+    gigachat_auth_key = os.getenv("GIGACHAT_AUTH_KEY", "").strip()
+    gigachat_auth_url = os.getenv(
+        "GIGACHAT_AUTH_URL",
+        "https://ngw.devices.sberbank.ru:9443/api/v2/oauth",
+    ).strip()
+    gigachat_api_url = os.getenv(
+        "GIGACHAT_API_URL", "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
+    ).strip()
+    gigachat_scope = os.getenv("GIGACHAT_SCOPE", "GIGACHAT_API_PERS").strip()
+    gigachat_verify_ssl = os.getenv("GIGACHAT_VERIFY_SSL", "true").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
 
     if not bot_token:
         raise RuntimeError("BOT_TOKEN is not set. Put it in .env (see .env.example).")
     if bot_mode not in {"polling", "webhook"}:
         raise RuntimeError("BOT_MODE must be either 'polling' or 'webhook'.")
+    if llm_provider not in {"openai", "gigachat"}:
+        raise RuntimeError("LLM_PROVIDER must be either 'openai' or 'gigachat'.")
     if bot_mode == "webhook" and not webhook_base_url:
         raise RuntimeError(
             "WEBHOOK_BASE_URL is not set. Put it in .env (see .env.example)."
@@ -43,5 +75,14 @@ def load_settings() -> Settings:
         webhook_path=webhook_path,
         app_host=app_host,
         app_port=app_port,
-        flow_file=flow_file,
+        llm_provider=llm_provider,
+        llm_api_key=llm_api_key,
+        llm_api_url=llm_api_url,
+        llm_model=llm_model,
+        llm_timeout_seconds=llm_timeout_seconds,
+        gigachat_auth_key=gigachat_auth_key,
+        gigachat_auth_url=gigachat_auth_url,
+        gigachat_api_url=gigachat_api_url,
+        gigachat_scope=gigachat_scope,
+        gigachat_verify_ssl=gigachat_verify_ssl,
     )

@@ -17,23 +17,11 @@ main.py
 ## Что сейчас покрыто
 - Telegram bot runtime (`aiogram`).
 - HTTP API и lifecycle (`FastAPI + uvicorn`).
-- Flow reader и валидатор markdown-сценариев.
-- Flow engine с пользовательским состоянием in-memory.
+- Тестовый сценарий поддержки:
+  - `/start` показывает кнопку `Поддержка`,
+  - после нажатия пользователь может отправлять вопросы,
+  - бот пересылает вопрос в LLM API и возвращает ответ.
 - Healthcheck: `GET /health`.
-
-## Reader (v1)
-- Реализован `reader`, который:
-  - читает `flow.md`,
-  - парсит блоки (`message`, `menu`, `mes-menu`),
-  - валидирует структуру и переходы,
-  - строит runtime-граф для бота.
-- Ошибки спецификации возвращаются в структурированном виде (`E_*` коды).
-
-## Flow Engine (v1)
-- Хранит текущее состояние пользователя (in-memory).
-- Обрабатывает переходы по кнопкам.
-- Рендерит сообщения и inline-кнопки по сценарию.
-- Поддерживает правило `hide_on_next` (скрытие прошлого сообщения при следующем шаге).
 
 ## Безопасность и конфигурация
 - Креды бота не хранятся в репозитории.
@@ -41,13 +29,18 @@ main.py
 - Основные параметры:
   - `BOT_TOKEN`
   - `BOT_MODE`
-  - `FLOW_FILE`
+  - `LLM_PROVIDER` (`openai` или `gigachat`)
+  - `LLM_API_KEY`
+  - `LLM_API_URL`
+  - `LLM_MODEL`
+  - `GIGACHAT_AUTH_KEY` (если `LLM_PROVIDER=gigachat`)
+  - `GIGACHAT_AUTH_URL`, `GIGACHAT_API_URL`, `GIGACHAT_SCOPE`
   - `APP_HOST`, `APP_PORT`
   - `WEBHOOK_BASE_URL`, `WEBHOOK_PATH` (для webhook-режима)
 
 ## Что достигнуто
-- Получен рабочий MVP адаптивного бота, который строит диалог и кнопки из внешнего markdown-сценария.
-- Подготовлена база для следующего этапа: горячая перезагрузка flow, персистентное хранилище состояния и расширенные правила маршрутизации.
+- Получен рабочий MVP интеграции Telegram-бота с LLM API через HTTP.
+- Подготовлена база для следующего этапа: подключение RAG и сценариев эскалации.
 
 ## Docker
 Сборка образа:
@@ -74,4 +67,15 @@ docker compose down
 Логи:
 ```bash
 docker compose logs -f bot-api
+```
+
+## GigaChat конфигурация
+Для переключения на GigaChat:
+```env
+LLM_PROVIDER=gigachat
+GIGACHAT_AUTH_KEY=<authorization_key>
+GIGACHAT_AUTH_URL=https://ngw.devices.sberbank.ru:9443/api/v2/oauth
+GIGACHAT_API_URL=https://gigachat.devices.sberbank.ru/api/v1/chat/completions
+GIGACHAT_SCOPE=GIGACHAT_API_PERS
+LLM_MODEL=GigaChat
 ```

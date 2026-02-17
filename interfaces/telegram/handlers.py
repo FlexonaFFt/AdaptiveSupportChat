@@ -1,57 +1,68 @@
-from contextlib import suppress
-from typing import Optional
+import html
 
 from aiogram import F, Router
 from aiogram.filters import CommandStart
-from aiogram.exceptions import TelegramBadRequest
 from aiogram.types import CallbackQuery, Message
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from application.flow_engine import RenderItem
-from infrastructure.runtime import get_flow_engine
+from infrastructure.llm_api_client import LLMApiError
+from infrastructure.runtime import get_llm_client
 
 router = Router()
-_last_message_id_by_user: dict[int, int] = {}
-_last_hide_on_next_by_user: dict[int, bool] = {}
+_support_mode_users: set[int] = set()
+
+
+def _support_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Поддержка", callback_data="support:start")]
+        ]
+    )
 
 
 @router.message(CommandStart())
 async def start_handler(message: Message) -> None:
     if message.from_user is None:
         return
-    engine = get_flow_engine()
-    await _render_items(message, message.from_user.id, engine.start(message.from_user.id))
-
-
-@router.callback_query(F.data.startswith("flow:"))
-async def flow_callback(callback: CallbackQuery) -> None:
-    if callback.message is None:
-        await callback.answer()
-        return
-    engine = get_flow_engine()
-    button_id = callback.data.split(":", 1)[1]
-    await _render_items(
-        callback.message,
-        callback.from_user.id,
-        engine.on_button(callback.from_user.id, button_id),
+    _support_mode_users.discard(message.from_user.id)
+    await message.answer(
+        "Нажмите кнопку ниже, чтобы перейти в режим поддержки.",
+        reply_markup=_support_keyboard(),
     )
+
+
+@router.callback_query(F.data == "support:start")
+async def support_callback(callback: CallbackQuery) -> None:
+    _support_mode_users.add(callback.from_user.id)
     await callback.answer()
+    if callback.message is not None:
+        await callback.message.answer(
+            "Режим поддержки включен. Напишите вопрос, и я отправлю его в LLM."
+        )
 
 
-async def _render_items(message: Message, user_id: int, items: list[RenderItem]) -> None:
-    if _last_hide_on_next_by_user.get(user_id) and user_id in _last_message_id_by_user:
-        with suppress(TelegramBadRequest):
-            await message.bot.delete_message(
-                chat_id=message.chat.id,
-                message_id=_last_message_id_by_user[user_id],
-            )
+@router.message(F.text)
+async def support_question_handler(message: Message) -> None:
+    if message.from_user is None:
+        return
 
-    last_message_id: Optional[int] = None
-    last_hide_on_next = False
-    for item in items:
-        sent = await message.answer(item.text, reply_markup=item.keyboard)
-        last_message_id = sent.message_id
-        last_hide_on_next = item.rules_hide_on_next
+    user_id = message.from_user.id
+    if user_id not in _support_mode_users:
+        await message.answer(
+            "Сначала нажмите кнопку Поддержка через /start.",
+            reply_markup=_support_keyboard(),
+        )
+        return
 
-    if last_message_id is not None:
-        _last_message_id_by_user[user_id] = last_message_id
-        _last_hide_on_next_by_user[user_id] = last_hide_on_next
+    llm_client = get_llm_client()
+    try:
+        answer = await llm_client.ask(message.text or "")
+    except LLMApiError as exc:
+        safe_error = html.escape(str(exc))
+        await message.answer(f"Ошибка LLM API: {safe_error}")
+        return
+    except Exception:
+        await message.answer("Не удалось получить ответ от LLM API.")
+        return
+
+    await message.answer(answer)

@@ -9,16 +9,26 @@ from aiogram.enums import ParseMode
 from aiogram.types import Update
 from fastapi import FastAPI, Request
 
-from application.flow_engine import FlowEngine
-from infrastructure.flow_markdown_reader import load_flow_from_markdown
-from infrastructure.runtime import set_flow_engine
+from infrastructure.llm_api_client import LLMApiClient
+from infrastructure.runtime import set_llm_client
 from infrastructure.settings import Settings
 from interfaces.telegram.handlers import router
 
 
 def create_app(settings: Settings) -> FastAPI:
-    flow = load_flow_from_markdown(settings.flow_file)
-    set_flow_engine(FlowEngine(flow))
+    llm_client = LLMApiClient(
+        provider=settings.llm_provider,
+        model=settings.llm_model,
+        timeout_seconds=settings.llm_timeout_seconds,
+        openai_api_url=settings.llm_api_url,
+        openai_api_key=settings.llm_api_key,
+        gigachat_api_url=settings.gigachat_api_url,
+        gigachat_auth_url=settings.gigachat_auth_url,
+        gigachat_auth_key=settings.gigachat_auth_key,
+        gigachat_scope=settings.gigachat_scope,
+        gigachat_verify_ssl=settings.gigachat_verify_ssl,
+    )
+    set_llm_client(llm_client)
 
     bot = Bot(
         token=settings.bot_token,
@@ -59,7 +69,7 @@ def create_app(settings: Settings) -> FastAPI:
 
     @app.get("/health")
     async def health() -> dict[str, str]:
-        return {"status": "ok", "mode": settings.bot_mode, "flow_id": flow.flow_id}
+        return {"status": "ok", "mode": settings.bot_mode, "llm_model": llm_client.model}
 
     @app.post(settings.webhook_path)
     async def telegram_webhook(request: Request) -> dict[str, bool]:
