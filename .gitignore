@@ -22,4 +22,5 @@ venv/
 !.env.example
 
 # Generated artifacts
-generated/*.json
+core/generated/*.json
+

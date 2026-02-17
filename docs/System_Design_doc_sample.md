@@ -1,7 +1,7 @@
 # ML System Design Doc - [RU]
 ## Дизайн ML системы - Warehouse Demand Simulation & Procurement System MVP v1
 
-Источник требований: `docs/small.md`.
+Источник требований: `core/docs/small.md`.
 Статус: черновик для согласования.
 
 ### 1. Цели и предпосылки

@@ -103,9 +103,9 @@ def _unique(values: list[str]) -> list[str]:
 
 
 if __name__ == "__main__":
-    knowledge_dir = os.getenv("KNOWLEDGE_DIR", "knowledge").strip()
-    generated_dir = os.getenv("GENERATED_DIR", "generated").strip()
-    faq_file = os.getenv("GENERATED_FAQ_FILE", "generated/faq.json").strip()
+    knowledge_dir = os.getenv("KNOWLEDGE_DIR", "core/knowledge").strip()
+    generated_dir = os.getenv("GENERATED_DIR", "core/generated").strip()
+    faq_file = os.getenv("GENERATED_FAQ_FILE", "core/generated/faq.json").strip()
     result = run_bootstrap(
         knowledge_dir=knowledge_dir,
         generated_dir=generated_dir,

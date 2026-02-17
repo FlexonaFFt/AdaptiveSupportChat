@@ -62,13 +62,13 @@ def load_settings() -> Settings:
         "yes",
         "on",
     }
-    knowledge_dir = os.getenv("KNOWLEDGE_DIR", "knowledge").strip()
+    knowledge_dir = os.getenv("KNOWLEDGE_DIR", "core/knowledge").strip()
     rag_top_k = int(os.getenv("RAG_TOP_K", "4").strip())
     rag_min_relevance_score = float(os.getenv("RAG_MIN_RELEVANCE_SCORE", "0.12").strip())
     rag_chunk_size_chars = int(os.getenv("RAG_CHUNK_SIZE_CHARS", "900").strip())
     rag_chunk_overlap_chars = int(os.getenv("RAG_CHUNK_OVERLAP_CHARS", "120").strip())
-    generated_dir = os.getenv("GENERATED_DIR", "generated").strip()
-    generated_faq_file = os.getenv("GENERATED_FAQ_FILE", "generated/faq.json").strip()
+    generated_dir = os.getenv("GENERATED_DIR", "core/generated").strip()
+    generated_faq_file = os.getenv("GENERATED_FAQ_FILE", "core/generated/faq.json").strip()
     start_faq_limit = int(os.getenv("START_FAQ_LIMIT", "4").strip())
 
     if not bot_token:

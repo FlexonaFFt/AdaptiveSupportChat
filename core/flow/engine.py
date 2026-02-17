@@ -4,7 +4,7 @@ from typing import Optional
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-from domain.flow.models import Block, Flow
+from core.flow.models import Block, Flow
 
 
 @dataclass(frozen=True)

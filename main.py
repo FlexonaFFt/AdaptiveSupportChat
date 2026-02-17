@@ -2,8 +2,8 @@ import logging
 
 import uvicorn
 
-from infrastructure.settings import load_settings
-from interfaces.api.app import create_app
+from core.settings import load_settings
+from api.app import create_app
 
 settings = load_settings()
 app = create_app(settings)
